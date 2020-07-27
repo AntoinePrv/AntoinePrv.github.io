@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html><head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Minimal ABI Break Example - Antoine Prouvost</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta property="og:title" content="Minimal ABI Break Example" />
+<meta property="og:description" content="    A simple example example illustrating what is an ABI and why it is so hard to maintain.
+  " />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.prouvost.dev/post/2020/minimal-abi-break-example/" />
+<meta property="article:published_time" content="2020-07-27T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-07-27T00:00:00+00:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Minimal ABI Break Example"/>
+<meta name="twitter:description" content="    A simple example example illustrating what is an ABI and why it is so hard to maintain.
+  "/>
+<link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,300italic,400italic|Raleway:200,300" rel="stylesheet">
+
+	<link rel="stylesheet" type="text/css" media="screen" href="https://www.prouvost.devcss/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://www.prouvost.devcss/main.css" />
+
+	<script src="https://www.prouvost.devjs/feather.min.js"></script>
+	
+	<script src="https://www.prouvost.devjs/main.js"></script>
+</head>
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	<base href="https://www.prouvost.dev">
+	<div class="site-description">
+		<h1 class="site-title"><a href="https://www.prouvost.dev">Antoine Prouvost</a></h1>
+		<nav class="nav social">
+			<ul class="flat"><a href="https://github.com/AntoinePrv" title="GitHub"><i data-feather="github"></i></a><a href="https://twitter.com/AntoineProuvost" title="Twitter"><i data-feather="twitter"></i></a><a href="https://scholar.google.com/citations?user=5k3Cll0AAAAJ&amp;hl=en&amp;oi=ao" title="Scholar"><i data-feather="book-open"></i></a><a href="https://www.linkedin.com/in/antoine-prouvost-0667b6a4/" title="LinkedIn"><i data-feather="linkedin"></i></a>
+					| <a href="aprouvost-cv.pdf">[cv]</a>
+				
+			</ul>
+		</nav>
+	</div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			
+			<li><a href="/">Home</a></li>
+			
+			<li><a href="/post/" class="active">Blog</a></li>
+			
+		</ul>
+	</nav>
+</div>
+
+		
+<div class="post">
+
+	<div class="post-header">
+		<h2 class="title">Minimal ABI Break Example</h2>
+		<div class="meta">Posted at &mdash; Jul 27, 2020</div>
+	</div>
+
+	<div class="markdown">
+		<p>In compiled languages, such as C++, developpers have the possibility to use and build
+<a href="https://en.wikipedia.org/wiki/Library_(computing)#Shared_libraries"><em>shared libraries</em></a>, also known
+as a <em>dynamic libraries</em>.
+To use a shared library (in an exectuable or another shared library), the library depended on needs
+to be present at compile time (<a href="https://en.wikipedia.org/wiki/Linker_(computing)">link</a> time to be
+precise) but really symbols from the library (functions, types, global variables <em>etc</em>.) are
+resolved at runtime (when something is executed) by the
+<a href="https://en.wikipedia.org/wiki/Dynamic_linker">dynamic linker</a>.</p>
+<p>Shared library have many advantages.
+They can be <em>shared</em> between multiple programs, reducing memory and disk usage.
+Because they are resolved at runtime, they can be changed without impacting any program that depend
+on them.
+This is convenient to deliver updates to user without needing much tools on their machine (which can
+be hard to get right).
+It also means we can choose the most appropriate library only when executing the program.
+For instance, a library such as <a href="https://numpy.org">NumPy</a> is compiled against
+<a href="https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">BLAS</a>.
+BLAS has many implementations, for instance <a href="https://www.openblas.net/">OpenBLAS</a>,
+<a href="http://math-atlas.sourceforge.net/">ATLAS</a>, <a href="https://github.com/flame/blis">BLIS</a>, that we can
+choose from.
+One of them, <a href="https://software.intel.com/mkl">Intel MKL</a>, is built specificly for Intel CPU, and we
+can therefore expect it to be more efficient on these machines.
+But for NumPy, it does not change anything.
+It only needs to compile against <em>a</em> BLAS library, and it will work with <em>all</em> BLAS libraries.</p>
+<p><em>All of them? What if we take something completly different and called it BLAS?</em><br>
+As you can expect that will not work.
+Some information (<em>e.g.</em> function names) have been looked up when compiling against the shared
+library, and this information need to be the same in the library used at runtime.
+This is kown as the library interface: the observable boundary of componnents (functions, classes,
+<em>etc</em>.) that can be used to interact with the library.
+It is often the same as the
+<a href="https://en.wikipedia.org/wiki/Application_programming_interface"><em>Application Programming Interface</em></a>
+(API), <em>i.e.</em> the way we (humans) can write code using a library.
+For shared library, there also exsits an
+<a href="https://en.wikipedia.org/wiki/Application_binary_interface"><em>Application Binary Interface</em></a> to
+define the way computers can interact with it (in binary form).
+Understanding ABI is highly technical.
+It can change even if the shared library API (or even all of it source code) remain unchanged.
+ABI is what make a shared library compatible with another.
+The first thing that impacts ABI is the CPU architecture.
+If we build a library for a given type, say <a href="https://en.wikipedia.org/wiki/X86-64">x86-64</a>, we
+cannot expect it to be interchangable with another like
+<a href="https://en.wikipedia.org/wiki/AArch64">ARM64</a>.</p>
+<p>If we want to update a library without having to recompile its dependent programs, the ABI has to
+remain stable.
+This is why in this post we will build our intuition by studying an example that breaks the ABI.</p>
+<p><em>Should you care about ABI stability in my library?</em><br>
+If you are wondering this, then chances are the answer is no.
+Libraries that are ABI stable across many versions and implementations are usually cornerstones of
+our computing ecosystem and require dramatically more work and knowledge than what is in this post.
+You will however better understand the struggle of package managers.</p>
+<h2 id="libcomplex-010---hello-world">libcomplex 0.1.0 - Hello world</h2>
+<p>Complex number are at the foundation of many alogorithm and applications, so we have decided to put
+much of our knowledge into a library <code>libcomplex</code> so that developpers can build it.
+Watch out for bugs, it is still in in beta!</p>
+<p>We build a class to represent complex numbers and put it in our <code>include/complex.hpp</code> header.
+It uses the carthesian representation, but can compute a complex&rsquo;s modulus and argument.
+We also added a <code>to_string</code> method to get human readable representation.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#75715e">#pragma once
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;ostream&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+
+<span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Complexe</span> {
+  Complexe(<span style="color:#66d9ef">double</span> real, <span style="color:#66d9ef">double</span> imaginary) <span style="color:#66d9ef">noexcept</span> <span style="color:#f92672">:</span>
+    real(real), imaginary(imaginary) {}
+
+  <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">modulus</span>() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">noexcept</span>;
+  <span style="color:#66d9ef">double</span> <span style="color:#a6e22e">argument</span>() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">noexcept</span>;
+
+  <span style="color:#66d9ef">friend</span> std<span style="color:#f92672">::</span>ostream<span style="color:#f92672">&amp;</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">&lt;&lt;</span>(std<span style="color:#f92672">::</span>ostream<span style="color:#f92672">&amp;</span> out, <span style="color:#66d9ef">const</span> Complex<span style="color:#f92672">&amp;</span> c);
+
+<span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+  <span style="color:#66d9ef">double</span> imaginary;
+  <span style="color:#66d9ef">double</span> real;
+};
+</code></pre></div><p>And we put the implementation of the method in the associated <code>src/complex.cpp</code> file</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;cmath&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;complex.hpp&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+
+<span style="color:#66d9ef">double</span> Complexe<span style="color:#f92672">::</span>modulus() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">noexcept</span> {
+  <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>sqrt(real<span style="color:#f92672">*</span>real <span style="color:#f92672">+</span> imaginary<span style="color:#f92672">*</span>imaginary);
+}
+
+<span style="color:#66d9ef">double</span> Complex<span style="color:#f92672">::</span>argument() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">noexcept</span> {
+  <span style="color:#66d9ef">if</span>(modulus() <span style="color:#f92672">==</span> <span style="color:#ae81ff">0.</span>){
+    <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>nan(<span style="color:#e6db74">&#34;&#34;</span>);
+  } <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span>(imaginary <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.</span>){
+    <span style="color:#66d9ef">return</span> <span style="color:#f92672">-</span> std<span style="color:#f92672">::</span>asin(real <span style="color:#f92672">/</span> modulus());
+  }
+  <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>asin(real <span style="color:#f92672">/</span> modulus());
+}
+
+std<span style="color:#f92672">::</span>ostream<span style="color:#f92672">&amp;</span> <span style="color:#66d9ef">operator</span><span style="color:#f92672">&lt;&lt;</span>(std<span style="color:#f92672">::</span>ostream<span style="color:#f92672">&amp;</span> out, <span style="color:#66d9ef">const</span> Complex<span style="color:#f92672">&amp;</span> c) {
+  out <span style="color:#f92672">&lt;&lt;</span> c.real <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; + &#34;</span> <span style="color:#f92672">&lt;&lt;</span> c.imaginary <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#39;i&#39;</span>;
+  out <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; = &#34;</span> <span style="color:#f92672">&lt;&lt;</span> c.modulus() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;e^(&#34;</span> <span style="color:#f92672">&lt;&lt;</span> c.argument() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; i)&#34;</span>;
+  <span style="color:#66d9ef">return</span> out;
+}
+</code></pre></div><p>Our library is a success, and many projects use it as a dependency!
+One of them, <code>awesome-app</code>, has the following code</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+<span style="color:#75715e">#include</span> <span style="color:#75715e">&#34;complex.hpp&#34;</span><span style="color:#75715e">
+</span><span style="color:#75715e"></span>
+
+<span style="color:#66d9ef">int</span> <span style="color:#a6e22e">main</span>(<span style="color:#66d9ef">int</span> argc, <span style="color:#66d9ef">char</span><span style="color:#f92672">**</span> argv) {
+  <span style="color:#66d9ef">const</span> Complex z{std<span style="color:#f92672">::</span>stod(argv[<span style="color:#ae81ff">1</span>]), std<span style="color:#f92672">::</span>stod(argv[<span style="color:#ae81ff">2</span>])};
+  std<span style="color:#f92672">::</span>cout <span style="color:#f92672">&lt;&lt;</span> z <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#39;\n&#39;</span>;
+}
+</code></pre></div><p>Because compiling a library can be tricky to get right, we write a short <a href="https://cmake.org/">CMake</a>
+file to do it.
+For simplicity, we will add <code>awesome-app</code> to the same file, but in practice this would be two
+separate projects.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cmake" data-lang="cmake">cmake_minimum_required(<span style="color:#e6db74">VERSION</span> <span style="color:#e6db74">3.0</span>)<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>project(<span style="color:#e6db74">Complex</span> <span style="color:#e6db74">VERSION</span> <span style="color:#e6db74">0.1.0</span> <span style="color:#e6db74">LANGUAGES</span> <span style="color:#e6db74">CXX</span> <span style="color:#e6db74">DESCRIPTION</span> <span style="color:#e6db74">&#34;Complex number library&#34;</span>)<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>add_library(<span style="color:#e6db74">complex</span> <span style="color:#e6db74">SHARED</span> <span style="color:#e6db74">src/complex.cpp</span>)<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>target_include_directories(<span style="color:#e6db74">complex</span> <span style="color:#e6db74">PUBLIC</span> <span style="color:#e6db74">&#34;${CMAKE_CURRENT_SOURCE_DIR}/include&#34;</span>)<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>target_compile_features(<span style="color:#e6db74">complex</span> <span style="color:#e6db74">PUBLIC</span> <span style="color:#e6db74">cxx_std_14</span>)<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>add_executable(<span style="color:#e6db74">awesome-app</span> <span style="color:#e6db74">src/awesome-app.cpp</span>)<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>target_link_libraries(<span style="color:#e6db74">awesome-app</span> <span style="color:#e6db74">PRIVATE</span> <span style="color:#e6db74">complex</span>)<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>And now to compile and run all</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake -B build
+cmake --build build
+./build/awesome-app <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">4</span>
+</code></pre></div><p>Yields</p>
+<pre><code>3 + 4i = 5e^(0.643501 i)
+</code></pre><h2 id="libcomplex-020---pardon-my-french">libcomplex 0.2.0 - Pardon my French</h2>
+<p>Too excited about our library, we named our class <code>Complexe</code> in French instead of the English
+<code>Complex</code>.
+We make the change and try to recompile only our library (<em>i.e.</em> not <code>awesome-app</code>).</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake --build build --target complex
+</code></pre></div><p>Now if our dependcy <code>awesome-app</code> update the library without recompiling</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./build/awesome-app <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">4</span>
+</code></pre></div><p>It will get the error (this is on MacOS) similar to</p>
+<pre><code>dyld: Symbol not found: __ZlsRNSt3__113basic_ostreamIcNS_11char_traitsIcEEEERK8Complexe
+  Referenced from: ./build/awesome-app
+  Expected in: ./build/libcomplex.dylib
+</code></pre><p>This means that the dynamic loader cannot find the (binary) function to print a <code>Complexe</code> (the
+names in the error are <a href="https://en.wikipedia.org/wiki/Name_mangling">mangled</a>).
+Indeed, when recompling the library we replaced the function to print a <code>Complexe</code> with a function
+to print a <code>Complex</code>.
+The ABI is no longer compatible.
+<code>awseome-app</code> needs to be recompiled</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake --build build --target awesome-app
+</code></pre></div><p>And this time we have the error</p>
+<pre><code>./src/awesome-app.cpp:8:8: error:
+      unknown type name 'Complexe'; did you mean 'Complex'?
+        const Complexe z{std::stod(argv[1]), std::sto...
+              ^~~~~~~~
+              Complex
+</code></pre><p>Indeed, the name has changed.
+The API has also been modified and <code>awesome-app</code> needs to modify their code to replace <code>Complexe</code>
+with <code>Complex</code>.</p>
+<p>Changing the API will always change the ABI so evalutating if the ABI was stable here was a lost
+cause anyways.</p>
+<h2 id="libcomplex-021---bug-fix">libcomplex 0.2.1 - Bug fix</h2>
+<p>In our enthusiasm, we made a mistake in the formula to compute a complex&rsquo;s argument.
+We used <code>asin</code> instead of <code>acos</code>.
+To be fair, there is an equivalent formulat using <code>asin</code>, and also one using <code>atan</code>.
+There is actually a function in the standard library to compute directly this angle:
+<a href="https://en.cppreference.com/w/cpp/numeric/math/atan2"><code>std::atan2</code></a>.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>
+Because it is made just for this, we can expect it to be more numerically accurate.
+It also reduce the amount of code we have to maintain and test, so we make the switch.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#66d9ef">double</span> Complex<span style="color:#f92672">::</span>argument() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">noexcept</span> {
+  <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>atan2(imaginary, real);
+}
+</code></pre></div><p>If we recompile only the library</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake --build build --target complex
+</code></pre></div><p>And use it direclty without recompiling <code>awesome-app</code>,</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./build/awesome-app <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">4</span>
+</code></pre></div><p>We get</p>
+<pre><code>3 + 4i = 5e^(0.927295 i)
+</code></pre><p>The ABI remain unchanged so we were able to deliver a bugfix to our users (and the users of
+<code>awesome-app</code>) by simply swaping the library.
+This could happen without any action from the developpers of <code>awesome-app</code>!</p>
+<h2 id="libcomplex-030---abi-break">libcomplex 0.3.0 - ABI break</h2>
+<p>While putting some documentation in our code, we notice the following attributes in the <code>Complex</code>
+class</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Complex</span> {
+  ...
+<span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+  <span style="color:#66d9ef">double</span> imaginary;
+  <span style="color:#66d9ef">double</span> real;
+};
+</code></pre></div><p>Complex numbers are usually represented with thei real part first, so we would like our code to have
+look the same.
+We inverse the attributes</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Complex</span> {
+  ...
+<span style="color:#66d9ef">private</span><span style="color:#f92672">:</span>
+  <span style="color:#66d9ef">double</span> real;
+  <span style="color:#66d9ef">double</span> imaginary;
+};
+</code></pre></div><p>These are private attributes.
+They cannot be accessed outside of the class, so our API has not changed.
+If we try again to only swap the new library</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake --build build --target complex
+</code></pre></div><p>And use it direclty without recompiling <code>awesome-app</code>,</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./build/awesome-app <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">4</span>
+</code></pre></div><p>This time, we get</p>
+<pre><code>4 + 3i = 5e^(0.643501 i)
+</code></pre><p>Notice how <code>3</code> and <code>4</code> (and the phase) have been swapped, just like we swapped the attributes in the
+class?
+This happens because the <code>complex.hpp</code> header get included in <code>awesome-app.cpp</code>, some code for
+<code>Complex</code> get generated in <code>awesome-app</code>.
+In particluar, the compiler aligns all the attributes (like if it was a tuple) and loses the notion
+of name.
+The constructor of <code>Complex</code> is defined in the headers, so when the compiler compliles
+<code>awesome-app</code>, it puts the imaginary part first and the real part afterwards.
+When we use a function from the updated library, the compiler expects on the contrary to find the
+real attribute first and the imaginary second, hence the flip.</p>
+<p>We made a modification that left the API unchanged but changed the ABI.
+This is a particluarily nasty one, because it does not give any errors.
+The programs is completly well behaved for computers but it does not compute what we expect it.
+As before, the solution is to recompile <code>awesome-app</code>.</p>
+<p>The topic of ABI stability is extremely complex.
+For instance, renaming <code>imaginary</code> to any other name would have preserved the ABI.
+Similarily, if the constructor was only <em>declared</em> in <code>include/complex.hpp</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Complex</span> {
+  Complex(<span style="color:#66d9ef">double</span> real, <span style="color:#66d9ef">double</span> imaginary) <span style="color:#66d9ef">noexcept</span>;
+  ...
+};
+</code></pre></div><p>And <em>defined</em> in <code>src/complex.cpp</code></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp">Complex<span style="color:#f92672">::</span>Complex(<span style="color:#66d9ef">double</span> real, <span style="color:#66d9ef">double</span> imaginary) <span style="color:#66d9ef">noexcept</span> <span style="color:#f92672">:</span>
+  real(real), coco(imaginary) {}
+</code></pre></div><p>Then, <em>in this limited example</em>, we can swap the attributes without changing the ABI.</p>
+<p>I hope this example helped you understand how and when pacakge manager can decide to replace a
+shared library for another, and hopefully it will help you figure out related bugs in the future.
+This post was meant to be illustrative and is not an incitation to develop ABI stable library.
+In particular, the examples in this post may behave differently in a more complete libraries.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>Ok, there is also a <a href="https://en.cppreference.com/w/cpp/numeric/complex"><code>std::complex</code></a>
+type, but 🤫. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+
+	</div>
+
+	<div class="post-tags">
+		
+			
+		
+	</div>
+	</div>
+
+		<div class="footer wrapper">
+	<nav class="nav">
+		<div> © Antoine Prouvost |  <a href="https://github.com/vividvilla/ezhil">Ezhil theme</a> | Built with <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div>
+
+
+
+<script>feather.replace()</script>
+	</div>
+</body>
+</html>

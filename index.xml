@@ -2,22 +2,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Antoine Prouvost</title>
-    <link>https://www.prouvost.dev/</link>
+    <link>https://www.prouvost.dev/t/</link>
     <description>Recent content on Antoine Prouvost</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Antoine Prouvost</copyright>
     <lastBuildDate>Mon, 27 Jul 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="https://www.prouvost.dev/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://www.prouvost.dev/t/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Minimal ABI Break Example</title>
-      <link>https://www.prouvost.dev/post/2020/minimal-abi-break-example/</link>
+      <link>https://www.prouvost.dev/t/post/2020/minimal-abi-break-example/</link>
       <pubDate>Mon, 27 Jul 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://www.prouvost.dev/post/2020/minimal-abi-break-example/</guid>
+      <guid>https://www.prouvost.dev/t/post/2020/minimal-abi-break-example/</guid>
       <description>In compiled languages, such as C++, developpers have the possibility to use and build shared libraries, also known as a dynamic libraries. To use a shared library (in an exectuable or another shared library), the library depended on needs to be present at compile time (link time to be precise) but really symbols from the library (functions, types, global variables etc.) are resolved at runtime (when something is executed) by the dynamic linker.</description>
     </item>
     

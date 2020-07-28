@@ -3,26 +3,26 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://www.prouvost.dev/t/</loc>
+    <loc>https://www.prouvost.dev/</loc>
     <lastmod>2020-07-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://www.prouvost.dev/t/post/2020/minimal-abi-break-example/</loc>
+    <loc>https://www.prouvost.dev/post/2020/minimal-abi-break-example/</loc>
     <lastmod>2020-07-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://www.prouvost.dev/t/post/</loc>
+    <loc>https://www.prouvost.dev/post/</loc>
     <lastmod>2020-07-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://www.prouvost.dev/t/categories/</loc>
+    <loc>https://www.prouvost.dev/categories/</loc>
   </url>
   
   <url>
-    <loc>https://www.prouvost.dev/t/tags/</loc>
+    <loc>https://www.prouvost.dev/tags/</loc>
   </url>
   
 </urlset>

@@ -143,7 +143,7 @@ We also added a <code>to_string</code> method to get human readable representati
   <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>sqrt(real<span style="color:#f92672">*</span>real <span style="color:#f92672">+</span> imaginary<span style="color:#f92672">*</span>imaginary);
 }
 
-<span style="color:#66d9ef">double</span> Complex<span style="color:#f92672">::</span>argument() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">noexcept</span> {
+<span style="color:#66d9ef">double</span> Complexe<span style="color:#f92672">::</span>argument() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">noexcept</span> {
   <span style="color:#66d9ef">if</span>(modulus() <span style="color:#f92672">==</span> <span style="color:#ae81ff">0.</span>){
     <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>nan(<span style="color:#e6db74">&#34;&#34;</span>);
   } <span style="color:#66d9ef">else</span> <span style="color:#a6e22e">if</span>(imaginary <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0.</span>){
@@ -216,7 +216,7 @@ The ABI is no longer compatible.
 </code></pre><p>Indeed, the name has changed.
 The API has also been modified and <code>awesome-app</code> needs to modify its code to replace <code>Complexe</code>
 with <code>Complex</code>.</p>
-<p>Changing the API will always change the ABI so evalutating if the ABI was stable here was a lost
+<p>Changing the API will always change the ABI so evaluating if the ABI was stable here was a lost
 cause anyways.</p>
 <h2 id="libcomplex-021---bug-fix">libcomplex 0.2.1 - Bug fix</h2>
 <p>In our enthusiasm, we made a mistake in the formula to compute a complex&rsquo;s argument.
@@ -231,7 +231,7 @@ It also reduce the amount of code we have to maintain and test, so we make the s
 }
 </code></pre></div><p>If we recompile only the library</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake --build build --target complex
-</code></pre></div><p>And use it direclty without recompiling <code>awesome-app</code>,</p>
+</code></pre></div><p>And use it directly without recompiling <code>awesome-app</code>,</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./build/awesome-app <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">4</span>
 </code></pre></div><p>We get</p>
 <pre><code>3 + 4i = 5e^(0.927295 i)
@@ -260,7 +260,7 @@ We inverse the attributes</p>
 They cannot be accessed outside of the class, so our API has not changed.
 If we try again to only swap the new library</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake --build build --target complex
-</code></pre></div><p>And use it direclty without recompiling <code>awesome-app</code>,</p>
+</code></pre></div><p>And use it directly without recompiling <code>awesome-app</code>,</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./build/awesome-app <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">4</span>
 </code></pre></div><p>This time, we get</p>
 <pre><code>4 + 3i = 5e^(0.643501 i)
@@ -289,10 +289,10 @@ Similarily, if the constructor was only <em>declared</em> in <code>include/compl
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp">Complex<span style="color:#f92672">::</span>Complex(<span style="color:#66d9ef">double</span> real, <span style="color:#66d9ef">double</span> imaginary) <span style="color:#66d9ef">noexcept</span> <span style="color:#f92672">:</span>
   real(real), coco(imaginary) {}
 </code></pre></div><p>Then, <em>in this limited example</em>, we could swap the attributes without changing the ABI.</p>
-<p>I hope this example helped you understand how and when pacakge manager can decide to replace a
+<p>I hope this example helped you understand how and when package managers can decide to replace a
 shared library for another, and hopefully it will help you figure out related bugs in the future.
 This post was meant to be illustrative and is not an incitation to develop ABI stable library.
-In particular, the examples in this post may behave differently in a more complete libraries.</p>
+In particular, the examples in this post may behave differently in a more complete library.</p>
 <section class="footnotes" role="doc-endnotes">
 <hr>
 <ol>

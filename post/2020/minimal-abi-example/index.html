@@ -60,24 +60,23 @@
 		<p>In compiled languages, such as C++, developpers have the possibility to use and build
 <a href="https://en.wikipedia.org/wiki/Library_(computing)#Shared_libraries"><em>shared libraries</em></a>, also known
 as a <em>dynamic libraries</em>.
-To use a shared library (in an exectuable or another shared library), the library depended on needs
-to be present at compile time (<a href="https://en.wikipedia.org/wiki/Linker_(computing)">link</a> time to be
-precise) but really symbols from the library (functions, types, global variables <em>etc</em>.) are
-resolved at runtime (when something is executed) by the
+To depend on a shared library (in an exectuable or another shared library), said library needs
+to be present at compile time, <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> but really symbols from the library (functions, types,
+global variables <em>etc</em>.) are resolved at runtime (when something is executed) by the
 <a href="https://en.wikipedia.org/wiki/Dynamic_linker">dynamic linker</a>.</p>
-<p>Shared library have many advantages.
+<p>Shared libraries have many advantages.
 They can be <em>shared</em> between multiple programs, reducing memory and disk usage.
 Because they are resolved at runtime, they can be changed without impacting any program that depend
 on them.
-This is convenient to deliver updates to user without needing much tools on their machine (which can
-be hard to get right).
-It also means we can choose the most appropriate library only when executing the program.
+This is convenient to deliver updates to user without requiring much tools on their machine (which
+can be hard to get right).
+It also means we can wait until program execution to choose the most appropriate library.
 For instance, a library such as <a href="https://numpy.org">NumPy</a> is compiled against
 <a href="https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">BLAS</a>.
 BLAS has many implementations, for instance <a href="https://www.openblas.net/">OpenBLAS</a>,
 <a href="http://math-atlas.sourceforge.net/">ATLAS</a>, <a href="https://github.com/flame/blis">BLIS</a>, that we can
 choose from.
-One of them, <a href="https://software.intel.com/mkl">Intel MKL</a>, is built specificly for Intel CPU, and we
+One of them, <a href="https://software.intel.com/mkl">Intel MKL</a>, is built specificly for Intel CPUs, and we
 can therefore expect it to be more efficient on these machines.
 But for NumPy, it does not change anything.
 It only needs to compile against <em>a</em> BLAS library, and it will work with <em>all</em> BLAS libraries.</p>
@@ -87,14 +86,15 @@ Some information (<em>e.g.</em> function names) have been looked up when compili
 library, and this information need to be the same in the library used at runtime.
 This is kown as the library interface: the observable boundary of componnents (functions, classes,
 <em>etc</em>.) that can be used to interact with the library.
-It is often the same as the
+In non compiled languages (<em>e.g.</em> Python), it is the same as the
 <a href="https://en.wikipedia.org/wiki/Application_programming_interface"><em>Application Programming Interface</em></a>
 (API), <em>i.e.</em> the way we (humans) can write code using a library.
-For shared library, there also exsits an
+For shared library however, there also exsits an
 <a href="https://en.wikipedia.org/wiki/Application_binary_interface"><em>Application Binary Interface</em></a> to
 define the way computers can interact with it (in binary form).
 Understanding ABI is highly technical.
-It can change even if the shared library API (or even all of it source code) remain unchanged.
+It can change even if the shared library API (or even all of it source code) remains
+unchanged.<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup>
 ABI is what make a shared library compatible with another.
 The first thing that impacts ABI is the CPU architecture.
 If we build a library for a given type, say <a href="https://en.wikipedia.org/wiki/X86-64">x86-64</a>, we
@@ -103,15 +103,15 @@ cannot expect it to be interchangable with another like
 <p>If we want to update a library without having to recompile its dependent programs, the ABI has to
 remain stable.
 This is why in this post we will build our intuition by studying an example that breaks the ABI.</p>
-<p><em>Should you care about ABI stability in my library?</em><br>
+<p><em>Should you care about ABI stability in your library?</em><br>
 If you are wondering this, then chances are the answer is no.
 Libraries that are ABI stable across many versions and implementations are usually cornerstones of
 our computing ecosystem and require dramatically more work and knowledge than what is in this post.
-You will however better understand the struggle of package managers.</p>
+With this article, you will however better understand the struggle of package managers.</p>
 <h2 id="libcomplex-010---hello-world">libcomplex 0.1.0 - Hello world</h2>
-<p>Complex number are at the foundation of many alogorithm and applications, so we have decided to put
-much of our knowledge into a library <code>libcomplex</code> so that developpers can build it.
-Watch out for bugs, it is still in in beta!</p>
+<p>Complex numbers are at the foundation of many algorithms and applications, so we have decided to put
+much of our knowledge into a library <code>libcomplex</code> so that other developpers can build it.
+Watch out for bugs, it is still in in beta! 😉</p>
 <p>We build a class to represent complex numbers and put it in our <code>include/complex.hpp</code> header.
 It uses the carthesian representation, but can compute a complex&rsquo;s modulus and argument.
 We also added a <code>to_string</code> method to get human readable representation.</p>
@@ -157,7 +157,7 @@ std<span style="color:#f92672">::</span>ostream<span style="color:#f92672">&amp;
   out <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; = &#34;</span> <span style="color:#f92672">&lt;&lt;</span> c.modulus() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34;e^(&#34;</span> <span style="color:#f92672">&lt;&lt;</span> c.argument() <span style="color:#f92672">&lt;&lt;</span> <span style="color:#e6db74">&#34; i)&#34;</span>;
   <span style="color:#66d9ef">return</span> out;
 }
-</code></pre></div><p>Our library is a success, and many projects use it as a dependency!
+</code></pre></div><p>Our library is an overnight success, and many projects use it as a dependency!
 One of them, <code>awesome-app</code>, has the following code</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;iostream&gt;</span><span style="color:#75715e">
 </span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string&gt;</span><span style="color:#75715e">
@@ -194,37 +194,37 @@ cmake --build build
 <code>Complex</code>.
 We make the change and try to recompile only our library (<em>i.e.</em> not <code>awesome-app</code>).</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake --build build --target complex
-</code></pre></div><p>Now if our dependcy <code>awesome-app</code> update the library without recompiling</p>
+</code></pre></div><p>Now if our dependency <code>awesome-app</code> updates the library without recompiling</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./build/awesome-app <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">4</span>
-</code></pre></div><p>It will get the error (this is on MacOS) similar to</p>
+</code></pre></div><p>It will get the error similar to (this is on MacOS)</p>
 <pre><code>dyld: Symbol not found: __ZlsRNSt3__113basic_ostreamIcNS_11char_traitsIcEEEERK8Complexe
   Referenced from: ./build/awesome-app
   Expected in: ./build/libcomplex.dylib
 </code></pre><p>This means that the dynamic loader cannot find the (binary) function to print a <code>Complexe</code> (the
-names in the error are <a href="https://en.wikipedia.org/wiki/Name_mangling">mangled</a>).
+names in the output are <a href="https://en.wikipedia.org/wiki/Name_mangling">mangled</a>).
 Indeed, when recompling the library we replaced the function to print a <code>Complexe</code> with a function
 to print a <code>Complex</code>.
 The ABI is no longer compatible.
 <code>awseome-app</code> needs to be recompiled</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake --build build --target awesome-app
-</code></pre></div><p>And this time we have the error</p>
+</code></pre></div><p>And this time we have the compilation error</p>
 <pre><code>./src/awesome-app.cpp:8:8: error:
       unknown type name 'Complexe'; did you mean 'Complex'?
         const Complexe z{std::stod(argv[1]), std::sto...
               ^~~~~~~~
               Complex
 </code></pre><p>Indeed, the name has changed.
-The API has also been modified and <code>awesome-app</code> needs to modify their code to replace <code>Complexe</code>
+The API has also been modified and <code>awesome-app</code> needs to modify its code to replace <code>Complexe</code>
 with <code>Complex</code>.</p>
 <p>Changing the API will always change the ABI so evalutating if the ABI was stable here was a lost
 cause anyways.</p>
 <h2 id="libcomplex-021---bug-fix">libcomplex 0.2.1 - Bug fix</h2>
 <p>In our enthusiasm, we made a mistake in the formula to compute a complex&rsquo;s argument.
 We used <code>asin</code> instead of <code>acos</code>.
-To be fair, there is an equivalent formulat using <code>asin</code>, and also one using <code>atan</code>.
+To be fair, there is an equivalent formula using <code>asin</code>, and also one using <code>atan</code>.
 There is actually a function in the standard library to compute directly this angle:
-<a href="https://en.cppreference.com/w/cpp/numeric/math/atan2"><code>std::atan2</code></a>.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup>
-Because it is made just for this, we can expect it to be more numerically accurate.
+<a href="https://en.cppreference.com/w/cpp/numeric/math/atan2"><code>std::atan2</code></a>.<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>
+Because it is made just for this, we can expect it to be numerically more accurate.
 It also reduce the amount of code we have to maintain and test, so we make the switch.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#66d9ef">double</span> Complex<span style="color:#f92672">::</span>argument() <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">noexcept</span> {
   <span style="color:#66d9ef">return</span> std<span style="color:#f92672">::</span>atan2(imaginary, real);
@@ -235,8 +235,8 @@ It also reduce the amount of code we have to maintain and test, so we make the s
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./build/awesome-app <span style="color:#ae81ff">3</span> <span style="color:#ae81ff">4</span>
 </code></pre></div><p>We get</p>
 <pre><code>3 + 4i = 5e^(0.927295 i)
-</code></pre><p>The ABI remain unchanged so we were able to deliver a bugfix to our users (and the users of
-<code>awesome-app</code>) by simply swaping the library.
+</code></pre><p>The ABI remains unchanged so we are able to deliver a bugfix to our users (and the users of
+<code>awesome-app</code>) by simply swaping in the new library.
 This could happen without any action from the developpers of <code>awesome-app</code>!</p>
 <h2 id="libcomplex-030---abi-break">libcomplex 0.3.0 - ABI break</h2>
 <p>While putting some documentation in our code, we notice the following attributes in the <code>Complex</code>
@@ -247,7 +247,7 @@ class</p>
   <span style="color:#66d9ef">double</span> imaginary;
   <span style="color:#66d9ef">double</span> real;
 };
-</code></pre></div><p>Complex numbers are usually represented with thei real part first, so we would like our code to have
+</code></pre></div><p>Complex numbers are usually represented with their real part first, so we would like our code to
 look the same.
 We inverse the attributes</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp"><span style="color:#66d9ef">struct</span> <span style="color:#a6e22e">Complex</span> {
@@ -266,17 +266,17 @@ If we try again to only swap the new library</p>
 <pre><code>4 + 3i = 5e^(0.643501 i)
 </code></pre><p>Notice how <code>3</code> and <code>4</code> (and the phase) have been swapped, just like we swapped the attributes in the
 class?
-This happens because the <code>complex.hpp</code> header get included in <code>awesome-app.cpp</code>, some code for
-<code>Complex</code> get generated in <code>awesome-app</code>.
-In particluar, the compiler aligns all the attributes (like if it was a tuple) and loses the notion
+This happens because when the <code>complex.hpp</code> header get included in <code>awesome-app.cpp</code>, some code for
+<code>Complex</code> gets generated in <code>awesome-app</code>.
+In particluar, the compiler aligns all its attributes (like if it was a tuple) and loses the notion
 of name.
-The constructor of <code>Complex</code> is defined in the headers, so when the compiler compliles
-<code>awesome-app</code>, it puts the imaginary part first and the real part afterwards.
-When we use a function from the updated library, the compiler expects on the contrary to find the
+The constructor of <code>Complex</code> is defined in the headers, so when the compiler compiles <code>awesome-app</code>,
+it puts the imaginary part first and the real part afterwards.
+When we use a function from the updated library, the library expects on the contrary to find the
 real attribute first and the imaginary second, hence the flip.</p>
 <p>We made a modification that left the API unchanged but changed the ABI.
 This is a particluarily nasty one, because it does not give any errors.
-The programs is completly well behaved for computers but it does not compute what we expect it.
+The program is completly well behaved for computers but it does not compute what we expect it.
 As before, the solution is to recompile <code>awesome-app</code>.</p>
 <p>The topic of ABI stability is extremely complex.
 For instance, renaming <code>imaginary</code> to any other name would have preserved the ABI.
@@ -288,7 +288,7 @@ Similarily, if the constructor was only <em>declared</em> in <code>include/compl
 </code></pre></div><p>And <em>defined</em> in <code>src/complex.cpp</code></p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp">Complex<span style="color:#f92672">::</span>Complex(<span style="color:#66d9ef">double</span> real, <span style="color:#66d9ef">double</span> imaginary) <span style="color:#66d9ef">noexcept</span> <span style="color:#f92672">:</span>
   real(real), coco(imaginary) {}
-</code></pre></div><p>Then, <em>in this limited example</em>, we can swap the attributes without changing the ABI.</p>
+</code></pre></div><p>Then, <em>in this limited example</em>, we could swap the attributes without changing the ABI.</p>
 <p>I hope this example helped you understand how and when pacakge manager can decide to replace a
 shared library for another, and hopefully it will help you figure out related bugs in the future.
 This post was meant to be illustrative and is not an incitation to develop ABI stable library.
@@ -297,8 +297,17 @@ In particular, the examples in this post may behave differently in a more comple
 <hr>
 <ol>
 <li id="fn:1" role="doc-endnote">
+<p><a href="https://en.wikipedia.org/wiki/Linker_(computing)">Link</a> time to be precise. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>For instance,
+<a href="https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html">GCC changed</a> its C++
+standard library ABI in GCC 5.
+Therefore the same shared library compiled with GCC &lt; 5 and GCC &gt;= 5 may not be ABI compatible. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3" role="doc-endnote">
 <p>Ok, there is also a <a href="https://en.cppreference.com/w/cpp/numeric/complex"><code>std::complex</code></a>
-type, but 🤫. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+type, but 🤫. <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 </ol>
 </section>

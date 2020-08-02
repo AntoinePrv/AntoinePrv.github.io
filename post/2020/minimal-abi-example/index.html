@@ -25,12 +25,11 @@
 <body>
 	<div class="container wrapper">
 		<div class="header">
-	<base href="https://www.prouvost.dev/">
 	<div class="site-description">
 		<h1 class="site-title"><a href="https://www.prouvost.dev/">Antoine Prouvost</a></h1>
 		<nav class="nav social">
 			<ul class="flat"><a href="https://github.com/AntoinePrv" title="GitHub"><i data-feather="github"></i></a><a href="https://twitter.com/AntoineProuvost" title="Twitter"><i data-feather="twitter"></i></a><a href="https://scholar.google.com/citations?user=5k3Cll0AAAAJ&amp;hl=en&amp;oi=ao" title="Scholar"><i data-feather="book-open"></i></a><a href="https://www.linkedin.com/in/antoine-prouvost-0667b6a4/" title="LinkedIn"><i data-feather="linkedin"></i></a>
-					| <a href="aprouvost-cv.pdf">[cv]</a>
+					| <a href="/aprouvost-cv.pdf">[cv]</a>
 				
 			</ul>
 		</nav>
@@ -287,7 +286,7 @@ Similarily, if the constructor was only <em>declared</em> in <code>include/compl
 };
 </code></pre></div><p>And <em>defined</em> in <code>src/complex.cpp</code></p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-cpp" data-lang="cpp">Complex<span style="color:#f92672">::</span>Complex(<span style="color:#66d9ef">double</span> real, <span style="color:#66d9ef">double</span> imaginary) <span style="color:#66d9ef">noexcept</span> <span style="color:#f92672">:</span>
-  real(real), coco(imaginary) {}
+  real(real), imaginary(imaginary) {}
 </code></pre></div><p>Then, <em>in this limited example</em>, we could swap the attributes without changing the ABI.</p>
 <p>I hope this example helped you understand how and when package managers can decide to replace a
 shared library for another, and hopefully it will help you figure out related bugs in the future.

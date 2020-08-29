@@ -7,10 +7,20 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>© Antoine Prouvost</copyright>
-    <lastBuildDate>Mon, 27 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 29 Aug 2020 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="https://www.prouvost.dev/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Why Conda?</title>
+      <link>https://www.prouvost.dev/post/2020/why-conda/</link>
+      <pubDate>Sat, 29 Aug 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://www.prouvost.dev/post/2020/why-conda/</guid>
+      <description>If you have written or used scientific software, especially in Python, you have probably been told to use Anaconda without much explanations, only to find yourself frustrated by conda slowness and inflexibility. Why is that? And what is the difference between pip install numpy and conda install numpy anyways?
+Conda is a general purpose cross language package manager tailored to deal with the extensive binary compatibility requirements of scientific software. In this blog post, I will detail what those requirements are and what Conda is doing different as a package manager to meet them.</description>
+    </item>
     
     <item>
       <title>Minimal ABI Example</title>

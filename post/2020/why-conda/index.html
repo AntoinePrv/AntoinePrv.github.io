@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html><head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Why Conda? - Antoine Prouvost</title><meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta property="og:title" content="Why Conda?" />
+<meta property="og:description" content="Exploring what is the conda package manager and how it solves the binary
+requirements of scientific software." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.prouvost.dev/post/2020/why-conda/" />
+<meta property="article:published_time" content="2020-08-29T00:00:00+00:00" />
+<meta property="article:modified_time" content="2020-08-29T00:00:00+00:00" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Why Conda?"/>
+<meta name="twitter:description" content="Exploring what is the conda package manager and how it solves the binary
+requirements of scientific software."/>
+<link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,300italic,400italic|Raleway:200,300" rel="stylesheet">
+
+	<link rel="stylesheet" type="text/css" media="screen" href="https://www.prouvost.dev/css/normalize.css" />
+	<link rel="stylesheet" type="text/css" media="screen" href="https://www.prouvost.dev/css/main.css" />
+
+	<script src="https://www.prouvost.dev/js/feather.min.js"></script>
+	
+	<script src="https://www.prouvost.dev/js/main.js"></script>
+</head>
+<body>
+	<div class="container wrapper">
+		<div class="header">
+	<div class="site-description">
+		<h1 class="site-title"><a href="https://www.prouvost.dev/">Antoine Prouvost</a></h1>
+		<nav class="nav social">
+			<ul class="flat"><a href="https://github.com/AntoinePrv" title="GitHub"><i data-feather="github"></i></a><a href="https://twitter.com/AntoineProuvost" title="Twitter"><i data-feather="twitter"></i></a><a href="https://scholar.google.com/citations?user=5k3Cll0AAAAJ&amp;hl=en&amp;oi=ao" title="Scholar"><i data-feather="book-open"></i></a><a href="https://www.linkedin.com/in/antoine-prouvost-0667b6a4/" title="LinkedIn"><i data-feather="linkedin"></i></a>
+					| <a href="/aprouvost-cv.pdf">[cv]</a>
+				
+			</ul>
+		</nav>
+	</div>
+
+	<nav class="nav">
+		<ul class="flat">
+			
+			
+			<li><a href="/">Home</a></li>
+			
+			<li><a href="/post/" class="active">Blog</a></li>
+			
+		</ul>
+	</nav>
+</div>
+
+		
+<div class="post">
+
+	<div class="post-header">
+		<h2 class="title">Why Conda?</h2>
+		<div class="meta">Posted at &mdash; Aug 29, 2020</div>
+	</div>
+
+	<div class="markdown">
+		<p>If you have written or used scientific software, especially in Python, you have probably been told
+to use Anaconda without much explanations, only to find yourself frustrated by conda slowness and
+inflexibility.
+Why is that? And what is the difference between <code>pip install numpy</code> and <code>conda install numpy</code>
+anyways?</p>
+<p>Conda is a general purpose cross language package manager tailored to deal with the extensive binary
+compatibility requirements of scientific software.
+In this blog post, I will detail what those requirements are and what Conda is doing different as a
+package manager to meet them.</p>
+<h2 id="some-definitions">Some definitions</h2>
+<p>First let us define some terms you may have heard that I will be using in this post.
+These terms are not written in stone, rather this is my own interpretation of what they usually
+refer to.</p>
+<dl>
+<dt>Software package</dt>
+<dd>A set of files used to distribute a given version of a library or executable to its users.
+There exists many types, with different specifications telling tools what to find inside, such as
+version number, dependencies, data files, and of course the actual software.
+Using the Python naming conventions, a package is either:
+<ul>
+<li>A <a href="https://packaging.python.org/glossary/#term-source-distribution-or-sdist"><em>source</em></a> package
+if it contains source code and a script to install the package on the user&rsquo;s system (for
+instance the compilation instructions);</li>
+<li>A <a href="https://packaging.python.org/glossary/#term-built-distribution"><em>built</em></a> package if the
+files only needs to be placed in the final install location (with no installation script).
+If a built package contains any compiled files, it is called a
+<a href="https://packaging.python.org/glossary/#term-binary-distribution"><em>binary</em></a> (built)
+package.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></li>
+</ul>
+</dd>
+<dt>Package manager</dt>
+<dd>A program that download, install, and manage packages and their dependencies.
+It knows what packages are installed, where, how to remove them <em>etc</em>.</dd>
+<dt>Pip</dt>
+<dd>The official Python package manager.
+By default it fetches packages from the Python Package Index <a href="https://pypi.org/">PyPI</a>.</dd>
+<dt>Anaconda</dt>
+<dd>A Python distribution, that is an installation of Python with a currated list of packages.
+It is also the the name of the <a href="https://www.anaconda.com/">company</a> who provide related services.</dd>
+<dt>Conda</dt>
+<dd>The open-source package manager for its own language agnostic binary packages.
+It can also install Python packages.
+By default, it download packages from <a href="https://anaconda.org/">Anaconda servers</a>.</dd>
+</dl>
+<h2 id="language-agnostic">Language Agnostic</h2>
+<p>Contrary to popular believe, conda is not (only) a Python package manager.
+It can distribute all types of files and programs.
+For instance, you might find there:</p>
+<ul>
+<li>Pure Python packages, such as the http library <a href="https://anaconda.org/anaconda/requests">Requests</a>;</li>
+<li>Python packages with compiled extensions, such as the array library
+<a href="https://anaconda.org/anaconda/numpy">NumPy</a>;</li>
+<li><code>R</code> package, such as the <a href="https://anaconda.org/r/r-stringr">StringR</a> package for common string
+operations;</li>
+<li>Shared (compiled) libraries, such as the optimized
+<a href="https://anaconda.org/anaconda/openblas">OpenBLAS</a> basic linear algebra library;</li>
+<li>The <a href="https://anaconda.org/anaconda/gcc_linux-64">GCC</a> compiler;</li>
+<li>The <a href="https://anaconda.org/anaconda/cmake">CMake</a> build tool for C and C++ (in particular);</li>
+<li>Other sort of programs, such as the <a href="https://anaconda.org/anaconda/git">Git</a> version control
+system.</li>
+</ul>
+<p>Scientific software is growing extremly complex.
+Scientists need high performance code and the ability to explore idea fast in high level languages
+such as Python.
+However, scientists cannot spend their time rewritting high performing basic operations constantly,
+nor should they have to.
+We rely on software that has been carefully developped tested and optimized by thousands of experts.
+For instance, <a href="https://scikit-learn.org">scikit-learn</a>, the go-to Python package for implementing
+machine learning models, relies on <a href="https://www.scipy.org">SciPy</a>, which relies on
+<a href="https://numpy.org">NumPy</a>, which in turn rely on C anf Fortran libraries such as
+<a href="https://www.netlib.org/lapack/">LAPACK</a>,
+<a href="https://en.wikipedia.org/wiki/Basic_Linear_Algebra_Subprograms">BLAS</a>, and
+<a href="https://gcc.gnu.org/onlinedocs/libquadmath/">QuadMath</a>.
+This is only an overview, and the details are even more complicated.
+For instance scikit-learn also depends on NumPy and SciPy depnds on some the same shared libraries
+as NumPy.</p>
+<p>Fortunaltely, we do not need to know all of this.
+We use scikit-learn out of the box and it works great!
+With Conda, the fact that one can upload package of any kind means developper can depend directly on
+shared libraries such as BLAS.
+Shared (compiled) libraries are not relics of the past that need to be migrated to something else.
+They need to exist for many reason, such as performance, and hardware compatibility.
+For example, on Intel processors, a dedicted BLAS implementation called
+<a href="https://software.intel.com/content/www/us/en/develop/tools/math-kernel-library.html">MKL</a> is often
+used.
+Another example is that of Graphic Processing Units (GPU) getting traction in scientific computing
+(including, but not limited to, deep learning).
+The GPUs has its own set of shared libraries that is need to function, and more to function
+efficiently.
+Doing Deep Learning on an Nvidia GPU, one would typically indirectly need
+<a href="https://developer.nvidia.com/cuda-zone">CUDA</a> and <a href="https://developer.nvidia.com/cudnn">CuDNN</a>.</p>
+<p>In summary, scientific software is hybrid in nature: high level interfaces are needed to explore
+ideas unconstrained and with the concepts that the community has already established, low level
+libraries are needed to get the best computing efficiency out of our hardware.
+Conda solve the problem of hybrid dependencies by serving language agnostic packages that can depend
+on one another.</p>
+<p>As a perk, if you also need some utilities tools that you would normally get on system package
+managers (<em>e.g.</em> <code>apt-get</code>) and like conda, you can also get them from there.
+I personally get <code>git</code>, <code>htop</code>, <code>fzf</code>, <code>ripgrep</code> <code>fswatch</code> (and more) on the
+<a href="https://conda-forge.org/">Conda-Forge</a> channel.</p>
+<p>One question remains.
+<em>If NumPy relies on shared libraries such as BLAS, how can one <code>pip install numpy</code> and still get a
+fully working package?</em>
+Short answer, they are distributed inside the NumPy package.
+In the next section, we will understand how, and the different approach taken by conda.</p>
+<h2 id="distributing-binary-packages">Distributing Binary packages</h2>
+<p>To understand the challenges that come with distributing binary packages, we will study Python
+packages.
+While the solutions used in Python might not be the same in other languages, the complications
+remains the same.
+There are multiple formats supported by pip.
+For clarity, I will keep the terms used so far and link to the Python specific definitions.</p>
+<h3 id="compiling-source-packages">Compiling source packages</h3>
+<p>Source packages (<a href="https://packaging.python.org/glossary/#term-source-distribution-or-sdist">sdist</a>)
+contain the source code and installation instructions (<em>e.g.</em> the <a href="">setup script</a> and compilation
+instruction for extensions and shared libraries).
+It is roughly a striped down version of the code in the library repository, archived and compressed.</p>
+<p>Relying soley on this format is not feasible.
+It would mean that upon installing our usual packages we might get hours of compilation.
+This may reasonable at first, as we think that we will install the packages only once, but in
+practice, we reinstall packages every time we update, every time we use a new environment/computer,
+and everytime we mess everything up and need a fresh start.
+Furthermore, not everyone has a compiler.
+There is most certainly one in our personal computers, but many minimal systems do not.
+Even if a compiler is present, it might not be properly supported by in the package source code, the
+computer may not have sufficient capabilities to compile and optimized high demanding libraries.
+Finally it is a huge waste of energy.
+A package like NumPy is downloaded
+<a href="https://pypistats.org/packages/numpy">over one millon times per day</a>.
+Imagine recompiling it and all the libraries it depends on so many times, when compiling a few
+binary packages could serve all these users.</p>
+<h3 id="binary-wheel-packages">Binary wheel packages</h3>
+<p>Another format that pip can install are the <a href="https://packaging.python.org/glossary/#term-wheel">wheel</a>
+(a <a href="https://packaging.python.org/glossary/#term-built-distribution">bdist</a>), only needs for the
+files it contained to be copied to the installation location.
+It is of relevance to us because it is binary (compiled) package format, that is, it contains the
+metadata for pip to select the correct version for the CPU and operating system.</p>
+<h4 id="os-tag">OS tag</h4>
+<p>When compiling a library, the resulting binary cannot run on any computer.
+At minimum, it is compiled for a given CPU architecture, and a given operating system.
+It it then natural to wonder <em>how can wheel packages support users with different CPU and OS?</em>
+The package itself only support what it has been compiled for, but we can compile it multiple time
+to create a binary wheel package for every case.
+Let us use the public <a href="https://warehouse.pypa.io/">PyPI API</a> to look the packages uploaded for the
+release <code>1.19.0</code> of NumPy.
+If your browser display the resulting JSON nicely, you can open the
+<a href="https://pypi.org/pypi/numpy/1.19.0/json">URL</a>, otherwise, using the command line, you can execute</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl -s https://pypi.org/pypi/numpy/1.19.0/json | python -m json.tool
+</code></pre></div><p>Under the sectionn <code>urls</code>, we see 25 uploads.
+The first one is</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#f92672">&#34;info&#34;</span>: {<span style="color:#960050;background-color:#1e0010">...</span>},
+  <span style="color:#f92672">&#34;last_serial&#34;</span>: <span style="color:#ae81ff">7524196</span>,
+  <span style="color:#f92672">&#34;releases&#34;</span>: {<span style="color:#960050;background-color:#1e0010">...</span>},
+  <span style="color:#f92672">&#34;urls&#34;</span>: [
+    {
+      <span style="color:#960050;background-color:#1e0010">...</span>
+      <span style="color:#f92672">&#34;filename&#34;</span>: <span style="color:#e6db74">&#34;numpy-1.19.0-cp36-cp36m-macosx_10_9_x86_64.whl&#34;</span>,
+      <span style="color:#960050;background-color:#1e0010">...</span>
+    },
+    <span style="color:#960050;background-color:#1e0010">...</span>
+  ]
+</code></pre></div><p>This file is a wheel package (<code>.whl</code>), for MacOS (<code>macosx_10_9</code>) with
+<a href="https://en.wikipedia.org/wiki/X86-64">x86_64</a> CPU architecture.
+We also find <code>numpy-1.19.0-cp37-cp37m-manylinux2014_aarch64.whl</code> for Linux with
+<a href="https://en.wikipedia.org/wiki/AArch64">ARM64</a> CPU, and finally the source distribution package
+<code>numpy-1.19.0.zip</code> in case no appropriate wheel can be found for the given user.</p>
+<p>We will now manually download the first one (given the url given in the JSON) to inspect it.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">wget https://files.pythonhosted.org/packages/d0/6f/26dd9a193c7292954c0afdaa9ed7c0f2595505388b7bd104dbe04669087a/numpy-1.19.0-cp36-cp36m-macosx_10_9_x86_64.whl
+</code></pre></div><p>A wheel is actually a compressed archived (usually named <code>.tgz</code> or <code>.tar.gz</code>) of files ready to be
+placed at the install location.
+Let us extract it to look inside.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-shell" data-lang="shell">tar -xzf numpy-1.19.0-cp36-cp36m-macosx_10_9_x86_64.whl
+</code></pre></div><p>There are many files, and the objective is not detail the NumPy package internals but rather to
+notice the presence of certain types of files.
+The file <code>numpy/random/_mt19937.cpython-36m-darwin.so</code> is a (compiled) shared library for a
+Python extension that, I assume by its name, implements the
+<a href="https://en.wikipedia.org/wiki/Mersenne_Twister">Mersenne Twister</a> pseudorandom number generator.
+The file <code>numpy/.dylibs/libopenblas.0.dylib</code> is the OpenBLAS library (<code>.dylib</code> are similar to <code>.so</code>
+on MacOS), added by the NumPy developper to face the limitations regarding non Python dependencies.
+<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></p>
+<h4 id="abi-tag">ABI tag</h4>
+<p>So far, we have seen that for binary packages such as Python wheels, we need to build packages for
+every configuration of the users, such as CPU architecture and operating system.
+In the NumPy 1.19.0 wheels, we can also observe an additional tags like <code>cp36m</code> and <code>cp37m</code>.
+These are telling us some sort of compatibility with Python 3.6 and Python 3.7.
+It may not be suprising to see a Python version appearing somewhere, after all different versions
+support different features.
+However, this is <em>much more suttle</em> than it looks.
+This part is the <em>Python Application Binary Interface</em> (ABI) tag.
+The <code>cp36m</code> tag is <em>not</em> claiming that NumPy 1.19.0 is compatible only with Python 3.6.
+In fact, it is compatible with all current versions greater than 3.6.
+It is giving a restriction to <em>this particular wheel</em> stating that it has been compiled for
+CPython 3.6 with the <a href="https://docs.python.org/2.3/whatsnew/section-pymalloc.html">Pymalloc</a> option.</p>
+<p><em>Python what?</em>
+Yes I wrote <em>CPython</em>, not <em>Python</em> or <em>Cython</em>.
+Python is the code we write.
+For most users gets interpreted (<em>i.e.</em> executed) by another program written in C, called <em>CPython</em>.
+It the reference and original implementation of Python, but anyone is free to create other
+implementations.
+There are quite a few! Some, like <a href="https://www.jython.org/">Jython</a> and
+<a href="https://ironpython.net/">IronPython</a> aim to support different extension language (Java and .Net
+respectively), while others, like <a href="https://www.pypy.org/">PyPy</a> bring other new features (a just in
+time compiler in this case).
+When writting an compiled extension, as it is the case in NumPy, we need somthing to communicate
+with the Python interpreter.
+In this case, this is the <a href="https://docs.python.org/3/c-api/index.html">CPython C library</a>, a library
+of C functions that can manipulate Python objects.
+It is code like this that Python extensions tools like <a href="https://cython.readthedocs.io">Cython</a> or
+<a href="https://pybind11.readthedocs.io">Pybind11</a> are generating.
+When running NumPy, some of this function are calling CPython C functions, that are resolved in a
+shared library and this is where ABI compatibility arise.
+This idea is that the Python library used to compile the NumPy Python extension must be <em>binary</em>
+compatible with the one used at runtime.
+This has to do with conventions about the way data is represented and functions are called by the
+CPU.
+It is highly complex and can be impacted by many things that are outside the scope of this blog
+post.
+What is important to understand is that is really has to do the binaries.
+The NumPy Cython code and the C code generated by Cython might very well be unchanged in the
+when comling aginst different Python librairies.</p>
+<p>As developpers of packages, we can ignore most of these details, and consider it the same way we
+considered the OS and CPU architecture: the source code is left unchanged, yet we need to recompile
+the wheel packages against all OS, CPU architecture, and now Python libraries, that we wish to
+support.
+Python and the packaging tools are keeping track of ABI compatibility, so all we need to do is
+execute again the same commands with different version of Python.</p>
+<h3 id="conda-packages-and-abi">Conda packages and ABI</h3>
+<p>In the previous section on binary wheels, we have explained that when we want to distribute an
+extension as binaries, we need to compile it for each combinaison of OS, CPU architecture, and
+Python version that we want to support.</p>
+<p>ABI is not something specific to Python, but somehting that arise when compiling against any
+shared (dynamic) library.
+It is a very complicated topic, so I have written <a href="/post/2020/minimal-abi-example/">another post</a>
+to convey intuition about it.
+When we build NumPy 1.19.0 against one of its library dependency, <em>e.g.</em> BLAS version 0.3.10, the
+binary package produced becomes only compatible with BLAS versions that are <em>binary compatible</em>
+(ABI) with the version 0.3.10, even if NumPy <em>source code</em> might<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup> be (API)
+compatible with all versions.
+NumPy needs to be compiled for each range of ABI compatible versions of BLAS that it wish to
+support, in the same way that is needs to be compiled for each version of Python.</p>
+<p>So while we could use wheels to package a BLAS library (even if there is no Python code), there are
+no way of stating for which ABI of BLAS, a given wheel of NumPy is build for.
+What NumPy could do is pin the BLAS dependency to something like <code>blas&gt;=0.3.10,&lt;0.4.0</code> to ensure ABI
+compatibility.<sup id="fnref:3"><a href="#fn:3" class="footnote-ref" role="doc-noteref">3</a></sup>
+But now, let&rsquo;s say SciPy, that also uses BLAS, is built for <code>blas&gt;=0.2.1,&lt;0.3.0</code>, then NumPy and
+SciPy become incompatible!
+And all this even if, prior to compiling, NumPy was (in our example) comaptible with all BLAS
+versions.
+Trying to coordinate the BLAS dependency for all packages would not only be massive work, it would
+be futile and break eventually.</p>
+<p>What we really need, is to be able to upload multiple NumPy wheels for different version of BLAS.
+Something like</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-text" data-lang="text">numpy-1.19.0-cp36-cp36m-macosx_10_9_x86_64-blas_0.2.whl
+numpy-1.19.0-cp36-cp36m-macosx_10_9_x86_64-blas_0.3.whl
+...
+</code></pre></div><p>This is not an easy.
+First, we would have to generalize this to all shared library dependencies, not only BLAS.
+Second, we need to know for each library what are the ABI compatible version ranges.
+Here we have assumed all 0.2.x are binary compatible between them, similarily for all 0.3.x <em>etc</em>.
+but this is oversimplified.</p>
+<p>This is the challenge that Conda has taken upon itself: generalizing the ABI tag to all shared
+library dependencies.
+When compiling a Conda package, developers have to specify not only the libraries they depend on,
+but also their ABI stable version range, and the matrix of OS, CPU architecture, and libraries
+(including Python) that they widh to build for.</p>
+<h2 id="conda-environments">Conda Environments</h2>
+<p>As a consequence, Conda must ensure between that all packages installed have a compatible versions,
+but also a compatible ABI.
+Conda needs to choose for each installed package, not only the version, but also the build.
+On the contrary, with Pip, for each package version, only one build is appropriate for the current
+user.
+The problem for Conda becomes large and hard to solve, with potentially hard to track bug if
+ABI incompatibilities are introduced.
+The <a href="https://web.archive.org/web/20130925061157/https://continuum.io/blog/new-advances-in-conda">approach taken by Conda</a>
+is to model the dependencies versions selction as a
+<a href="https://en.wikipedia.org/wiki/Boolean_satisfiability_problem">SAT</a> and use a solver to find
+compatible packages.</p>
+<p>To ensure that a solution exsists and that it is found quickly, a best practice is to make use of
+<a href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">environments</a>.
+Environments are a way to install a set of packages together independently of other environemnts.
+This let the users install incompatible versions of a libraries in different projects.
+This concept exist in many package manager, including for Pip with Python&rsquo;s
+<a href="https://docs.python.org/3/library/venv.html">virtual environments</a>.
+With Conda, it is even more critical to do so to keep the solving time reasonable.</p>
+<p>A good rule of thumbs is to do one environemnt per project, for which you install all the
+dependencies needed to work on the project (neither less nor more).</p>
+<h2 id="other-alternatives-for-python">Other alternatives for Python</h2>
+<h3 id="vendoring">Vendoring</h3>
+<p>Including shared library dependencies inside the package is what is currently being done on PyPI.
+NumPy vendors BLAS, LAPACK, <em>etc</em>. PyTorch also vendors BLAS, and CUDA.
+This is a pretty heavy solution that replicate libraries on file and in memory.
+It also is a non trivial solution that requires susbtantial work from developpers to make sure the
+library is properly found and loaded by the dynamic loader.
+It is not well documented and requires much knowledge about shared libraries and Python packages.</p>
+<p>A slightly similar alternative is to would be to vendor libraries as static libraries, that is
+included in the binary of the Python extension.
+Given that we can no longer find the library files in package, it is hard to know how much this is
+done.
+Changing a static library requires to recompile the whole extension, so this is also a downside to
+consider.</p>
+<h3 id="dependencies-pinning">Dependencies pinning</h3>
+<p>This is the alternative presented earlier where a dynamic library such as BLAS would be wrapped in a
+Python package.
+A given version of NumPy would then pin as a requirement the specific version of BLAS it was build
+for.
+Unless there are very few libraries, this approach would very soon lead to unsatisfiable dependency
+requirements.
+As with the previous alternative, it also requires substantial technical work.</p>
+<h3 id="conan">Conan?</h3>
+<p><a href="https://conan.io/">Conan</a> is a C/C++ package manager.
+As such, it is able to deal with all the complication of distributing binaries, including
+everything related to ABI compatibilities.</p>
+<p>Conan happens to be written in Python, so there is an opportunitiy to leverage it inside Python
+packages to resolve the C/C++ libraries!
+This is what the authors realized in their blog post
+&ldquo;<em><a href="https://blog.conan.io/2016/12/12/Conan-python-package-manager.html">Conan, a C, C++ and Python package manager</a></em>&rdquo;
+where they upload a binary Python package to Conan servers.</p>
+<p>The solution is still incomplete in my opinion, as the package are not managed by Pip, so it is
+tricky to make sure the package is visible to Python, and it also not possible for other PyPI
+package to use it as a dependency.</p>
+<p>I believe there is a great product for Python packages to be built with Conan, but right now, I am
+still learning to use Conan in its intended way.</p>
+<p>There is much more that could be added all along this blog post, but it is already quite long and
+technical.
+For sure, no one holds the perfect solution to package management, and tools are constantly
+improving.</p>
+<p>In this post, we observed that scientific software is complex and depends on an heterogeneous
+sets of libraries, some distributed as binaries.
+Then, we analysed how binaries have requirements between them stronger than there API compatibility.
+It&rsquo;s their ABI compatibility.
+Finally, we learned how Conda is managing ABI  compatibility of varaious libraries by tracking their
+ABI stability and compiling packages against multiple version of their library dependencies.</p>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p>In a compiled language, such as C++, all built packages would be binary because we
+cannot run C++ without compiling it.
+For a Python <em>only</em> library, a built pacakge cannot be binary because Python is interpreted
+(<em>i.e.</em> the source code is read directly and executed by an interpreter).
+In this case, there is really not much an installation script should do, and it built pacakges
+should be prefered.
+However, Python supports compiled extensions from other languages, so there also exists binary
+packages. <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p>We sometimes say that we <em>vendor</em> a given dependency to mean that it is included with the
+current library, instead of expecting a package manager or the user to install it. <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:3" role="doc-endnote">
+<p>I do not know if this is the case, but it does not matter for the sake of this
+example. <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+
+	</div>
+
+	<div class="post-tags">
+		
+			
+		
+	</div>
+	</div>
+
+		<div class="footer wrapper">
+	<nav class="nav">
+		<div> © Antoine Prouvost |  <a href="https://github.com/vividvilla/ezhil">Ezhil theme</a> | Built with <a href="https://gohugo.io">Hugo</a></div>
+	</nav>
+</div><script>feather.replace()</script>
+	<script data-goatcounter="https://prouvost.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+	</div>
+</body>
+</html>

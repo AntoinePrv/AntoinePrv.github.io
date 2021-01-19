@@ -18,7 +18,7 @@
       <pubDate>Sun, 17 Jan 2021 00:00:00 +0000</pubDate>
       
       <guid>https://www.prouvost.dev/post/2021/c-development-with-conda/</guid>
-      <description>Conda is a general purpose package manager widely used in the scientific community. We have shown in another post how it can install many assets, including managing with binary compatibility. Conda-Forge is a community driven Conda channel1 and set of tools to build and update packages. Together, they make a wide variety of packages available that we can leverage for C and C++ developement. Without further ado, let us have a look at some of them.</description>
+      <description>Conda is a general purpose package manager widely used in the scientific community. We have shown in another post how it can install many assets, including managing binary compatibility. Conda-Forge is a community driven Conda channel1 and set of tools to build and update packages. Together, they make a wide variety of packages available that we can leverage for C and C++ development. Without further ado, let us have a look at some of them.</description>
     </item>
     
     <item>

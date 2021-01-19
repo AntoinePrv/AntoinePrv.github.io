@@ -3,8 +3,8 @@
 	<meta charset="utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>C&#43;&#43; Development With Conda - Antoine Prouvost</title><meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta property="og:title" content="C&#43;&#43; Development With Conda" />
-<meta property="og:description" content="An example of how to use Conda to get a full C/C&#43;&#43; developement environment and
-discussing the advantages and drawback of doing using this thechnique.
+<meta property="og:description" content="An example of how to use Conda to get a full C/C&#43;&#43; development environment and
+discussing the advantages and drawbacks of using this thechnique.
 We suggest a generalization to other languages as well as highlight a bright future for Conda." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://www.prouvost.dev/post/2021/c-development-with-conda/" />
@@ -12,8 +12,8 @@ We suggest a generalization to other languages as well as highlight a bright fut
 <meta property="article:modified_time" content="2021-01-17T00:00:00+00:00" />
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="C&#43;&#43; Development With Conda"/>
-<meta name="twitter:description" content="An example of how to use Conda to get a full C/C&#43;&#43; developement environment and
-discussing the advantages and drawback of doing using this thechnique.
+<meta name="twitter:description" content="An example of how to use Conda to get a full C/C&#43;&#43; development environment and
+discussing the advantages and drawbacks of using this thechnique.
 We suggest a generalization to other languages as well as highlight a bright future for Conda."/>
 <link href="https://fonts.googleapis.com/css?family=Ubuntu:300,400,300italic,400italic|Raleway:200,300" rel="stylesheet">
 
@@ -61,14 +61,15 @@ We suggest a generalization to other languages as well as highlight a bright fut
 		<p><a href="https://conda.io">Conda</a> is a general purpose package manager widely used in the scientific
 community.
 We have shown in <a href="/post/2020/why-conda/">another post</a> how it can install many assets,
-including managing with binary compatibility.
+including managing binary compatibility.
 <a href="https://conda-forge.org/">Conda-Forge</a> is a community driven Conda channel<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> and set of
 tools to build and update packages.
 Together, they make a wide variety of packages available that we can leverage for C and C++
-developement. Without further ado, let us have a look at some of them.</p>
+development.
+Without further ado, let us have a look at some of them.</p>
 <h2 id="useful-packages">Useful Packages</h2>
 <p>Package managers usually focus on delivering the libraries that we use in our project, but there are
-actually many more tools that we use in our developement.
+actually many more tools that we use in our development.
 They are needed at different time and for different purposes (non exclusively):</p>
 <ul>
 <li>to build (compile) our project,</li>
@@ -100,13 +101,13 @@ libraries, or if you are working to make yours compatible with it.</li>
 <li>Benchmark framework such as <a href="https://github.com/google/benchmark">Google Benchmark</a>.</li>
 <li><a href="https://www.doxygen.nl">Doxygen</a>, possibly with <a href="https://www.sphinx-doc.org">Sphinx</a> and
 <a href="https://breathe.readthedocs.io">Breathe</a> if you prefer that toolset.<sup id="fnref:4"><a href="#fn:4" class="footnote-ref" role="doc-noteref">4</a></sup></li>
-<li>The <a href="https://clangd.llvm.org/">Clangd</a><sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> language server for your editor.</li>
+<li>The <a href="https://clangd.llvm.org/">Clangd</a><sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> C/C++ language server for your editor.</li>
 <li><a href="https://clang.llvm.org/extra/clang-tidy/">Clang-Tidy</a><sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> and
 <a href="http://cppcheck.sourceforge.net/">CppCheck</a> to verify code;
 <a href="https://clang.llvm.org/docs/ClangFormat.html">Clang-Format</a><sup id="fnref:5"><a href="#fn:5" class="footnote-ref" role="doc-noteref">5</a></sup> to format it.</li>
 <li><a href="https://pre-commit.com/">Pre-Commit</a> to run check automatically. Notice that this is a Python
-package, but because Conda is a general purpose package manader, it will autmatically get a
-compatible Python interpreter without more efforts.</li>
+package, but because Conda is a general purpose package manager, it will autmatically get a
+compatible Python interpreter without additional input.</li>
 <li>Many more utilities, such as <a href="https://git-scm.com">Git</a>, <a href="https://hub.github.com/">Hub</a>,
 <a href="https://www.gnu.org/software/wget/">Wget</a>, <a href="https://aws.amazon.com/cli/">AWSCLI</a>.</li>
 <li>Scripting langages, including <a href="https://www.python.org/">Python</a>, <a href="https://www.perl.org">Perl</a>,
@@ -118,7 +119,7 @@ and <a href="https://github.com/JuliaInterop/libcxxwrap-julia/">LibCxxWrap</a>.<
 </ul>
 <p>If you are missing something, you can
 <a href="https://conda-forge.org/docs/maintainer/adding_pkgs.html">submit it</a> to Conda-Forge.
-The process is happens entirely on Github, and all the building infrastructure will be set up
+The process happens entirely on Github, and all the building infrastructure will be set up
 automatically.</p>
 <h2 id="advantages-and-drawbacks">Advantages and Drawbacks</h2>
 <p>Many of the packages mentioned above are redundant with what is already available on our computer or
@@ -127,14 +128,14 @@ easily installable with the OS package manager (<code>apt-get</code>, <a href="h
 Why then choose Conda?</p>
 <ul>
 <li>Conda is <em>cross platform</em>, which means you can easily share the package requirements with
-collabortors and contributors.</li>
-<li>Conda provides <em>isolated environments</em>, which means you can have to worry about conflicting
+collaborators and contributors.</li>
+<li>Conda provides <em>isolated environments</em>, which means you do not have to worry about conflicting
 dependencies in different projects (one environment per project is a good rule of thumb).</li>
-<li>Conda is <em>reproducible</em>, with environment and lock files. You can share them with collaborators,
-to switch to another machine, or to rebuild your environment latter on if you decided to free up
-some space.</li>
-<li>Conda <em>does not need</em> admin rights to install packages. Useful if you (or you collaborators) are
-need to work on a university or company server.</li>
+<li>Conda is <em>reproducible</em>, with environment and lock files.
+You can share them with collaborators, use them to switch to another machine, or to rebuild
+your environment later on if you decide to free up some space.</li>
+<li>Conda <em>does not need</em> admin rights to install packages.
+This is useful if you (or you collaborators) need to work on a university or company server.</li>
 <li>Over language specific package managers, Conda is <em>not limited</em> to libraries or a single
 language.</li>
 <li>Everything is pre-compiled, which means fast installtion and update times.<sup id="fnref:6"><a href="#fn:6" class="footnote-ref" role="doc-noteref">6</a></sup></li>
@@ -166,50 +167,50 @@ It is a good practice to keep all our dependencies there, rather than installing
 </code></pre></div><p>Finally, we create the environment and activate it.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">conda env create --name myproject --file environment.yaml
 conda activate --name myproject
-</code></pre></div><p>We can now compile a simple C++ project and keep adding any other package that we need.</p>
+</code></pre></div><p>We can now compile a simple C++ project and keep adding any other packages that we need.</p>
 <h2 id="note-on-the-compiler-packages">Note on the Compiler Packages</h2>
 <p>The packages <code>fortran-compiler</code>, <code>c-compiler</code>, and <code>cxx-compiler</code> set many environment variables to
 control the compilation process.
 Some, like <code>FC</code>, <code>CC</code>, <code>CXX</code>, <code>LD</code>, <code>AR</code> are necessary as they help tools like CMake find the
-compilers and other tools needed.
+compilers and other utilities.
 Other like <code>FFLAGS</code>, <code>CFLAGS</code>, <code>CXXFLAGS</code>, <code>CPPFLAGS</code>, and <code>LDFLAGS</code> control compilation options and
 are also picked up by CMake.
-These are the flags used when building all the Conda packages, so they are most very reasonable.
-However, they are not all suited for developement.
-For instance, even when configuring with <code>CMAKE_BUILD_TYPE=Debug</code>, CMake ends up compiling with
+These are the flags used by Conda when building the packages, so they are very reasonable.
+However, they are not all well-suited for development.
+For instance, even when configuring with <code>CMAKE_BUILD_TYPE=Debug</code>, CMake ends up compiling with the
 <code>-O2</code> option.</p>
 <p>The first solution that we have is to not use the compilers packages but rather the one on our
 machine if that is an option.</p>
 <p>The second option is to leave it as it is.
 The flags can make it a bit harder to debug, but they are not weakening the build in any way, on
-the contraruy.
+the contrary.
 If we are not using this environment for debugging (<em>e.g.</em> if this is used in continuous
-integration, or to deploy on a university server).
-It is also possible to unset the environment variable manually when we need to run the debugger.</p>
-<p>Finally, we can adapt the way our build tool processes these flags.
+integration, or to deploy on a university server), then we can use the flags as is.
+It is also possible to unset these environment variables manually when we need to run the debugger.</p>
+<p>Finally, we can adapt the way our build tool processes these environment varaible flags.
 A CMake example is given in this toolchain file
 <a href="conda-toolchain.cmake"><code>conda-toolchain.cmake</code></a>.
 It defines two addtional <code>CMAKE_BUILD_TYPE</code>, <code>CondaDebug</code> and <code>CondaRelease</code> that uses the Conda
-flags, and reset the other build type to their default value.
+flags, and reset the other build types to their default value.
 We can use it wihtout modifying our source code:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake -B build CMAKE_TOOLCHAIN_FILE<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;path/to/conda-toolchain.cmake&#34;</span>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cmake -B build CMAKE_TOOLCHAIN_FILE<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;path/to/conda-toolchain.cmake -D CMAKE_BUILD_TYPE=...&#34;</span>
 </code></pre></div><h2 id="other-languages">Other Languages</h2>
 <p>Is Conda still relevant for other languages? I belive so.
-We can use their usual package manager to build our library, and still complete our developement
-environment it with Conda to get all the other tools needed, including the language itself.</p>
+We can use a language&rsquo;s usual package manager to build our library, and still complete our
+development environment with Conda to get all the other tools needed, including the language itself.</p>
 <p>We can get <a href="https://www.rust-lang.org">Rust</a>, <a href="https://nodejs.org">Node.js</a>,
-<a href="https://www.haskell.org">Haskell</a>, and <a href="https://julialang.org">Julia</a><sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup>.
-Even if Python and C/C++ have many libraries in Conda-Forge, we can also use them through other
-package managers (Pip and <a href="https://conan.io/">Conan</a>) also available through Conda.</p>
+<a href="https://www.haskell.org">Haskell</a>, and <a href="https://julialang.org">Julia</a><sup id="fnref:7"><a href="#fn:7" class="footnote-ref" role="doc-noteref">7</a></sup> on Conda-Forge.
+Even for Python and C/C++ that have many libraries in Conda-Forge, we can also use them through
+other package managers (Pip and <a href="https://conan.io/">Conan</a>) also available on Conda-Forge.</p>
 <h2 id="looking-in-the-future-the-mamba-org">Looking in the Future: The Mamba Org</h2>
-<p>Many of the issue of Conda are being tacked in a community led project: the
-<a href="https://github.com/mamba-org">Mamba Organization</a>.
-It include:</p>
+<p>Many of the issues of Conda are being tackled in a community led project:
+the <a href="https://github.com/mamba-org">Mamba Organization</a>.
+It includes:</p>
 <ul>
 <li><a href="https://github.com/mamba-org/mamba">Mamba</a>, a fast replacement to Conda.
 It is also fully written in C++, which means that it can be installed very easily without
 Python (which Conda needs).
-Micromanba, a standalone distribution is also under developement as a Microconda replacement.</li>
+Micromanba, a standalone distribution, is also under development as a Microconda replacement.</li>
 <li><a href="https://github.com/mamba-org/boa">Boa</a>, a replacement to <code>conda-build</code> the tool used to build
 Conda packages.</li>
 <li><a href="https://github.com/mamba-org/quetz">Quetz</a>, the first open-source server for hosting Conda
@@ -221,14 +222,14 @@ Up to now, hosting packages has been exclusively done by <a href="https://anacon
 <p>On top of making the Conda experience better for users, this also opens exciting possiblilies.
 Mamba speed makes it a promising candidate to resolve dependencies in continuous integration.
 This means that with a single requirement file, we can get the same dependencies in continuous
-integration that we use for developement, and this for all OS!</p>
-<p>The open source Quetz server means that new possiblitlities exists to host Conda packages with
-fine-grained access, including in private networks.
-This is a possibility available with most major package managers and which can fit the more complex
+integration that we use for development, and this for all OS!</p>
+<p>The open source Quetz server will make it possible to host Conda packages with fine-grained access,
+including in private networks.
+This is a possibility available with most major package managers, and which fits the more complex
 needs of companies.</p>
 <h2 id="acknowledgements">Acknowledgements</h2>
 <p>I would like to thank Wolf Vollprecht, Chris Burr, and Isuru Fernando for helping me understand the
-compiler packages.</p>
+Conda-Forge compiler packages.</p>
 <!-- raw HTML omitted -->
 <section class="footnotes" role="doc-endnotes">
 <hr>
@@ -244,16 +245,16 @@ compiler packages.</p>
 to use the different libraries. <a href="#fnref:3" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:4" role="doc-endnote">
-<p>Breathe connects Doxygen outputs to Sphinx. Check out
-<a href="https://xtensor.readthedocs.io">Xtensor</a> for an example of the output. <a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+<p>Breathe connects Doxygen outputs to Sphinx.
+Check out <a href="https://xtensor.readthedocs.io">Xtensor</a> for an example of the output. <a href="#fnref:4" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:5" role="doc-endnote">
 <p>In the <code>clang-tools</code> package. <a href="#fnref:5" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>
 <li id="fn:6" role="doc-endnote">
 <p>Conda has strict requirements to manage (binary) packages compatibility, as explained in
-this <a href="/post/2020/why-conda/">other post</a>. This can make it slow (or impossible) to find
-compatible versions of libraries.
+this <a href="/post/2020/why-conda/">other post</a>.
+This can make it slow (or impossible) to find compatible versions of libraries.
 However, a package manager that would need to compile some libraries would take significantly more
 time. <a href="#fnref:6" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
 </li>

@@ -47,7 +47,7 @@ Shared libraries have many advantages.</description>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://www.prouvost.dev/unsplash/</guid>
-      <description>  Home   html { background: url(https://source.unsplash.com/1600x900/?nature) no-repeat center center fixed; -webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover; }     </description>
+      <description>  Home   html { background: url(https://source.unsplash.com/featured/?nature) no-repeat center center fixed; -webkit-background-size: cover; -moz-background-size: cover; -o-background-size: cover; background-size: cover; }     </description>
     </item>
     
   </channel>
